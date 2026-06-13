@@ -1,0 +1,2 @@
+FROM alpine:3.24.0@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4 AS builder
+FROM dhi.io/node:26-alpine3.24@sha256:9640a20e8d61a1d791ff104c83be48f07e288739ab95e11ccce22614f515416f AS runner

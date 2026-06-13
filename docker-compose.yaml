@@ -1,0 +1,9 @@
+services:
+  backend:
+    image: tobtoby/simple-schedules:latest
+  db:
+    image: dhi.io/postgres:18-alpine3.24@sha256:0ba4765086acf65ac548c04f48588a64e3d9cee7c3255ab8f1594ac3fd2f60e0
+    environment:
+
+volumes:
+  db_data:
