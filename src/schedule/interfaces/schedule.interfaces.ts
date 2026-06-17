@@ -1,34 +1,40 @@
-import { Shift, Staff } from 'src/db/types';
+import { Shift, Staff } from '../../db/types';
+import { IsDate, IsNotEmpty, IsNumber } from 'class-validator';
 
-enum Day {
-  MONDAY,
-  TUESDAY,
-  WEDNESDAY,
-  THURSDAY,
-  FRIDAY,
-  SATURDAY,
-  SUNDAY,
+interface StaffAndShift {
+  staff: Staff;
+  shift: Shift;
+}
+
+interface DateAndShifts {
+  date: Date;
+  shifts: StaffAndShift[];
 }
 
 interface GetScheduleDto {
-  schedule: {
-    day: Day;
-    shifts:
-      | {
-          staff: Staff;
-          shift: Shift;
-        }[]
-      | null;
-  }[];
+  schedule: DateAndShifts[];
 }
 
 type GetOneShiftDto = Shift;
 
-type CreateOneShiftDto = Pick<Shift, 'staff_id' | 'time_range'>;
+class CreateOneShiftDto {
+  @IsNumber()
+  @IsNotEmpty()
+  staff_id: number;
+
+  @IsNotEmpty()
+  @IsDate()
+  start_date: Date;
+
+  @IsNotEmpty()
+  @IsDate()
+  end_date: Date;
+}
 
 export {
-  Day,
+  type StaffAndShift,
+  type DateAndShifts,
   type GetScheduleDto,
   type GetOneShiftDto,
-  type CreateOneShiftDto,
+  CreateOneShiftDto,
 };

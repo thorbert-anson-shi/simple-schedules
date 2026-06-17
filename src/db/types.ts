@@ -1,38 +1,17 @@
-import { customType } from 'drizzle-orm/pg-core';
+const dayAsName = new Map<number, string>();
+dayAsName.set(0, 'SUNDAY');
+dayAsName.set(1, 'MONDAY');
+dayAsName.set(2, 'TUESDAY');
+dayAsName.set(3, 'WEDNESDAY');
+dayAsName.set(4, 'THURSDAY');
+dayAsName.set(5, 'FRIDAY');
+dayAsName.set(6, 'SATURDAY');
 
-type TsRangeData = { start: Date; end: Date };
+type Role = 'ADMIN' | 'CUSTOMER';
 
-const timestampRange = customType<{
-  data: TsRangeData;
-  driverData: string;
-}>({
-  dataType() {
-    return 'tsrange';
-  },
-
-  toDriver(value: TsRangeData): string {
-    const startDate = value.start.toISOString();
-    const endDate = value.end.toISOString();
-
-    const startTimestamp = startDate.replace('T', ' ');
-    const endTimestamp = endDate.replace('T', ' ');
-
-    return `[${startTimestamp}, ${endTimestamp}]`;
-  },
-
-  fromDriver(value: string): TsRangeData {
-    const [startDate, endDate] = value.slice(1, -1).split(',');
-
-    return {
-      start: new Date(startDate),
-      end: new Date(endDate),
-    };
-  },
-});
-
-import { shiftsTable, staffTable, customersTable } from './schema';
+import { shiftsTable, staffTable, usersTable } from './schema';
 type Shift = typeof shiftsTable.$inferSelect;
 type Staff = typeof staffTable.$inferSelect;
-type Customer = typeof customersTable.$inferSelect;
+type User = typeof usersTable.$inferSelect;
 
-export { timestampRange, type Shift, type Staff, type Customer };
+export { dayAsName, type Role, type Shift, type Staff, type User };

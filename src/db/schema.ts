@@ -1,22 +1,43 @@
 import { integer, pgTable } from 'drizzle-orm/pg-core';
-import { timestampRange } from './types';
 import { varchar } from 'drizzle-orm/pg-core';
+import { pgEnum } from 'drizzle-orm/pg-core';
+import { date } from 'drizzle-orm/pg-core';
+import { check } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { uniqueIndex } from 'drizzle-orm/pg-core';
+
+const roleEnum = pgEnum('role', ['ADMIN', 'CUSTOMER']);
 
 const staffTable = pgTable('staff', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 256 }).notNull(),
+  name: varchar({ length: 255 }).notNull(),
 });
 
-const customersTable = pgTable('customers', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-});
+const usersTable = pgTable(
+  'users',
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    role: roleEnum().notNull(),
+    email: varchar({ length: 255 }).notNull(),
+    password_hash: varchar({ length: 128 }).notNull(),
+  },
+  (table) => [uniqueIndex('unique_email').on(sql`lower(${table.email})`)],
+);
 
-const shiftsTable = pgTable('shifts', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  staff_id: integer()
-    .references(() => staffTable.id)
-    .notNull(),
-  time_range: timestampRange().notNull(),
-});
+const shiftsTable = pgTable(
+  'shifts',
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    staff_id: integer()
+      .references(() => staffTable.id)
+      .notNull(),
+    start_time: date().notNull(),
+    end_time: date().notNull(),
+  },
+  // Ensure that end time has to come after start time
+  (table) => [
+    check('time_check', sql`${table.end_time} > ${table.start_time}`),
+  ],
+);
 
-export { staffTable, customersTable, shiftsTable };
+export { roleEnum, staffTable, usersTable, shiftsTable };
