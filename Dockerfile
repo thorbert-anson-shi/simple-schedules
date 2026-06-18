@@ -5,12 +5,12 @@ ENV CI=true
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 
-FROM base as prod-deps
+FROM base AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store,uid=0,gid=0 \
   pnpm install --prod --frozen-lockfile
 
 
-FROM base as builder
+FROM base AS builder
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store,uid=0,gid=0 \
   pnpm install --frozen-lockfile
@@ -22,5 +22,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/drizzle ./drizzle
+COPY --chown=node:node entrypoint.js /app/entrypoint.js
 USER node
-CMD ["node", "/app/dist/src/main.js"]
+ENTRYPOINT ["node", "/app/entrypoint.js"]

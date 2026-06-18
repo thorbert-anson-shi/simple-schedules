@@ -2,9 +2,9 @@ CREATE TYPE "public"."role" AS ENUM('ADMIN', 'CUSTOMER');--> statement-breakpoin
 CREATE TABLE "shifts" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "shifts_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"staff_id" integer NOT NULL,
-	"start_time" date NOT NULL,
-	"end_time" date NOT NULL,
-	CONSTRAINT "time_check" CHECK ("shifts"."end_time" > "shifts"."start_time")
+	"start_date" timestamp (0) with time zone NOT NULL,
+	"end_date" timestamp (0) with time zone NOT NULL,
+	CONSTRAINT "time_check" CHECK ("shifts"."end_date" > "shifts"."start_date")
 );
 --> statement-breakpoint
 CREATE TABLE "staff" (

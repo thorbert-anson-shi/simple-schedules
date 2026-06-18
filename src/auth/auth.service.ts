@@ -4,9 +4,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from 'src/db/types';
-import { CreateOneUserDto } from 'src/users/interfaces/users.interfaces';
-import { UsersRepository } from 'src/users/users.repository';
+import { User } from '@src/db/types';
+import { CreateOneUserDto } from '@src/users/interfaces/users.interfaces';
+import { UsersRepository } from '@src/users/users.repository';
 import { LoginDto } from './interfaces/auth.interfaces';
 import argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';

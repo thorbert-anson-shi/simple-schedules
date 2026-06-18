@@ -1,5 +1,10 @@
 import { Shift, Staff } from '../../db/types';
-import { IsDate, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+} from 'class-validator';
 
 interface StaffAndShift {
   staff: Staff;
@@ -17,18 +22,23 @@ interface GetScheduleDto {
 
 type GetOneShiftDto = Shift;
 
-class CreateOneShiftDto {
+class CreateShiftDto {
   @IsNumber()
   @IsNotEmpty()
   staff_id: number;
 
   @IsNotEmpty()
-  @IsDate()
+  @IsDateString({ strict: true, strictSeparator: true })
   start_date: Date;
 
   @IsNotEmpty()
-  @IsDate()
+  @IsDateString({ strict: true, strictSeparator: true })
   end_date: Date;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  num_weeks: number;
 }
 
 export {
@@ -36,5 +46,5 @@ export {
   type DateAndShifts,
   type GetScheduleDto,
   type GetOneShiftDto,
-  CreateOneShiftDto,
+  CreateShiftDto,
 };

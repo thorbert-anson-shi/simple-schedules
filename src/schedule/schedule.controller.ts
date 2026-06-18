@@ -1,37 +1,34 @@
 import {
-  type CreateOneShiftDto,
+  type CreateShiftDto,
   type GetOneShiftDto,
   type GetScheduleDto,
 } from './interfaces/schedule.interfaces';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
-import { Role } from 'src/db/types';
-import { User } from 'src/users/users.decorator';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { Role } from '../db/types';
+import { User } from '../users/users.decorator';
+import { AuthGuard, RolesGuard } from '../auth/auth.guard';
+import { Roles } from '../auth/auth.decorators';
 
 @Controller('schedule')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class ScheduleController {
   constructor(private scheduleService: ScheduleService) {}
 
   @Get()
+  @Roles(['ADMIN', 'CUSTOMER'])
   async getAll(
     @User() user: { sub: number; role: Role },
   ): Promise<GetScheduleDto> {
-    let daysAhead: number;
-
-    switch (user.role) {
-      case 'ADMIN':
-        daysAhead = 180;
-      case 'CUSTOMER':
-        daysAhead = 14;
-    }
-
+    const daysAhead: number = user.role === 'ADMIN' ? 180 : 14;
     return await this.scheduleService.fetchSchedule(daysAhead);
   }
 
   @Post()
-  createShift(@Body() createShiftBody: CreateOneShiftDto): GetOneShiftDto {
-    return this.scheduleService.createShift(createShiftBody);
+  @Roles(['ADMIN'])
+  async createShift(
+    @Body() createShiftBody: CreateShiftDto,
+  ): Promise<GetOneShiftDto[]> {
+    return await this.scheduleService.createShift(createShiftBody);
   }
 }

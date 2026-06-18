@@ -2,24 +2,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ScheduleService } from './schedule.service';
 import { ScheduleRepository } from './schedule.repository';
 import { StaffRepository } from '../staff/staff.repository';
-import { CreateOneShiftDto } from './interfaces/schedule.interfaces';
+import { CreateShiftDto } from './interfaces/schedule.interfaces';
 import { Shift, Staff } from '../db/types';
 
 const makeShift = (overrides: Partial<Shift> = {}): Shift =>
   ({
     id: 1,
     staff_id: 1,
-    start_time: '2020-02-02 17:00:00',
-    end_time: '2020-02-03 18:00:00',
+    start_date: '2020-02-02 17:00:00',
+    end_date: '2020-02-03 18:00:00',
     ...overrides,
   }) as Shift;
 
-const makeStaff = (overrides: Partial<Staff> = {}): Staff =>
-  ({
-    id: 1,
-    name: 'Staff Name',
-    ...overrides,
-  }) as Staff;
+const makeStaff = (overrides: Partial<Staff> = {}): Staff => ({
+  id: 1,
+  name: 'Staff Name',
+  ...overrides,
+});
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
@@ -93,10 +92,10 @@ describe('ScheduleService', () => {
 
   describe('createShift', () => {
     it('should delegate to the repository and return the shift', () => {
-      const dto = { staff_id: 1 } as CreateOneShiftDto;
+      const dto = { staff_id: 1 } as CreateShiftDto;
 
       const expected = makeShift();
-      mockScheduleRepository.createShift.mockReturnValue(expected);
+      mockScheduleRepository.createShift.mockResolvedValue([expected]);
 
       const result = service.createShift(dto);
 

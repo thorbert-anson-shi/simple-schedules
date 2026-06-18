@@ -1,5 +1,5 @@
 {
-  "id": "74f564a4-df8f-4a22-a1f6-d8cc7fb3d746",
+  "id": "98ad27b7-8e68-4bb0-be91-27b0636ed3c7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -31,15 +31,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "start_time": {
-          "name": "start_time",
-          "type": "date",
+        "start_date": {
+          "name": "start_date",
+          "type": "timestamp (0) with time zone",
           "primaryKey": false,
           "notNull": true
         },
-        "end_time": {
-          "name": "end_time",
-          "type": "date",
+        "end_date": {
+          "name": "end_date",
+          "type": "timestamp (0) with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -66,7 +66,7 @@
       "checkConstraints": {
         "time_check": {
           "name": "time_check",
-          "value": "\"shifts\".\"end_time\" > \"shifts\".\"start_time\""
+          "value": "\"shifts\".\"end_date\" > \"shifts\".\"start_date\""
         }
       },
       "isRLSEnabled": false

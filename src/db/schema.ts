@@ -5,6 +5,7 @@ import { date } from 'drizzle-orm/pg-core';
 import { check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { uniqueIndex } from 'drizzle-orm/pg-core';
+import { timestamp } from 'drizzle-orm/pg-core';
 
 const roleEnum = pgEnum('role', ['ADMIN', 'CUSTOMER']);
 
@@ -31,12 +32,18 @@ const shiftsTable = pgTable(
     staff_id: integer()
       .references(() => staffTable.id)
       .notNull(),
-    start_time: date().notNull(),
-    end_time: date().notNull(),
+    start_date: timestamp({
+      withTimezone: true,
+      precision: 0,
+    }).notNull(),
+    end_date: timestamp({
+      withTimezone: true,
+      precision: 0,
+    }).notNull(),
   },
   // Ensure that end time has to come after start time
   (table) => [
-    check('time_check', sql`${table.end_time} > ${table.start_time}`),
+    check('time_check', sql`${table.end_date} > ${table.start_date}`),
   ],
 );
 

@@ -20,7 +20,7 @@ async function seedAdmin() {
     .insert(usersTable)
     .values({
       role: 'ADMIN',
-      email: 'admin@staging.com',
+      email: env.ADMIN_EMAIL,
       password_hash: await argon2.hash(env.ADMIN_PASSWORD),
     })
     .onConflictDoNothing();
@@ -47,7 +47,7 @@ async function bootstrap() {
 
   await app.register(helmet);
   await app.register(fastifyCsrf);
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 
 bootstrap();

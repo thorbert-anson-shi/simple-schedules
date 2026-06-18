@@ -1,47 +1,47 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScheduleController } from './schedule.controller';
 import {
-  CreateOneShiftDto,
+  CreateShiftDto,
   GetOneShiftDto,
   GetScheduleDto,
 } from './interfaces/schedule.interfaces';
 import { ScheduleService } from './schedule.service';
-import { Day, Shift } from '../db/types';
+import { Shift } from '../db/types';
 
 describe('ScheduleController', () => {
   let scheduleController: ScheduleController;
   let validSchedule: GetScheduleDto;
   let validCreatedShift: GetOneShiftDto;
   let mockScheduleService: jest.Mocked<
-    Pick<ScheduleService, 'findAll' | 'createShift'>
+    Pick<ScheduleService, 'fetchSchedule' | 'createShift'>
   >;
 
   beforeAll(() => {
     validSchedule = {
       schedule: [
         {
-          day: Day.MONDAY,
+          date: new Date(),
           shifts: [
             {
               staff: { id: 1, name: 'Staff Name' },
               shift: {
                 id: 1,
                 staff_id: 1,
-                start_time: '2020-2-2 17:00:00',
-                end_time: '2020-2-2 19:00:00',
+                start_date: new Date('2020-2-2 17:00:00'),
+                end_date: new Date('2020-2-2 19:00:00'),
               },
             },
           ],
         },
       ],
-    } as GetScheduleDto;
+    };
 
     validCreatedShift = {
       id: 1,
       staff_id: 1,
-      start_time: '2020-2-2 17:00:00',
-      end_time: '2020-2-2 21:00:00',
-    } as Shift;
+      start_date: new Date('2020-2-2 17:00:00'),
+      end_date: new Date('2020-2-2 21:00:00'),
+    };
   });
 
   beforeEach(async () => {
@@ -60,13 +60,15 @@ describe('ScheduleController', () => {
 
   describe('get schedule', () => {
     it('should return a GetScheduleDto', async () => {
-      await expect(scheduleController.getAll()).resolves.toBe(validSchedule);
+      await expect(
+        scheduleController.getAll({ sub: 1, role: 'CUSTOMER' }),
+      ).resolves.toBe(validSchedule);
     });
   });
 
   describe('create shift', () => {
     it('should return a Shift', () => {
-      expect(scheduleController.createShift({} as CreateOneShiftDto)).toBe(
+      expect(scheduleController.createShift({} as CreateShiftDto)).toBe(
         validCreatedShift,
       );
     });
