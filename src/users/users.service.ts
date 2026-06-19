@@ -33,7 +33,7 @@ export class UsersService {
     }
   }
 
-  async createUser(userData: CreateOneUserDto): Promise<User> {
+  async createUser(userData: CreateOneUserDto): Promise<User[]> {
     return await this.usersRepository.createUser(userData);
   }
 

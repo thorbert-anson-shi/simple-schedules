@@ -11,9 +11,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store,uid=0,gid=0 \
 
 
 FROM base AS builder
-COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store,uid=0,gid=0 \
   pnpm install --frozen-lockfile
+# Copy after pnpm install so file changes don't require reinstallation of deps
+COPY . .
 RUN pnpm run build
 
 

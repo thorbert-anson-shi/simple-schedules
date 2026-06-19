@@ -97,7 +97,7 @@ describe('ScheduleService', () => {
       const expected = makeShift();
       mockScheduleRepository.createShift.mockResolvedValue([expected]);
 
-      const result = service.createShift(dto);
+      const result = service.createShifts(dto);
 
       expect(result).toBe(expected);
       expect(mockScheduleRepository.createShift).toHaveBeenCalledWith(dto);

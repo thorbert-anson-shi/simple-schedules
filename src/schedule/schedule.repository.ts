@@ -1,15 +1,14 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { shiftsTable } from '../db/schema';
 import { Shift } from '../db/types';
-import { CreateShiftDto } from './interfaces/schedule.interfaces';
+import {
+  CreateShiftDto,
+  DeleteShiftDto,
+} from './interfaces/schedule.interfaces';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { asc, lte, sql } from 'drizzle-orm';
-import { DatabaseError } from 'pg';
-import { PostgresError } from '@src/db/utils';
+import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
+import { QueryResult } from 'pg';
+import { getPostgresError, PostgresError } from '@src/db/utils';
 
 @Injectable()
 export class ScheduleRepository {
@@ -21,23 +20,18 @@ export class ScheduleRepository {
       returnedShifts = await this.db
         .select()
         .from(shiftsTable)
-        .where(lte(shiftsTable.end_date, sql`NOW() + ${daysAhead}`))
+        .where(
+          and(
+            lte(
+              shiftsTable.start_date,
+              sql`NOW() + ${daysAhead} * INTERVAL '1 day'`,
+            ),
+            gte(shiftsTable.start_date, sql`NOW()`),
+          ),
+        )
         .orderBy(asc(shiftsTable.staff_id));
     } catch (error) {
-      const dbError =
-        error instanceof DatabaseError
-          ? error
-          : error?.cause instanceof DatabaseError
-            ? error.cause
-            : null;
-      if (dbError) {
-        throw new PostgresError(
-          'A database-related error occurred',
-          dbError.code,
-        );
-      } else {
-        throw new InternalServerErrorException();
-      }
+      throw getPostgresError(error);
     }
 
     return returnedShifts;
@@ -74,22 +68,28 @@ export class ScheduleRepository {
         .values(createdShifts)
         .returning();
     } catch (error) {
-      const dbError =
-        error instanceof DatabaseError
-          ? error
-          : error?.cause instanceof DatabaseError
-            ? error.cause
-            : null;
-      if (dbError) {
-        throw new PostgresError(
-          'A database-related error occurred',
-          dbError.code,
-        );
-      } else {
-        throw new InternalServerErrorException();
-      }
+      throw getPostgresError(error);
     }
 
     return returnedShifts;
+  }
+
+  async deleteShift(deleteShiftsDto: DeleteShiftDto): Promise<number> {
+    let result: QueryResult;
+    try {
+      result = await this.db
+        .delete(shiftsTable)
+        .where(
+          and(
+            eq(shiftsTable.staff_id, deleteShiftsDto.staff_id),
+            lte(shiftsTable.end_date, deleteShiftsDto.end_date),
+            gte(shiftsTable.start_date, deleteShiftsDto.start_date),
+          ),
+        );
+    } catch (error) {
+      throw getPostgresError(error);
+    }
+
+    return result.rowCount ?? 0;
   }
 }

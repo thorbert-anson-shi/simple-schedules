@@ -6,8 +6,9 @@ import {
 import {
   CreateShiftDto,
   DateAndShifts,
-  GetOneShiftDto,
+  DeleteShiftDto,
   GetScheduleDto,
+  ShiftCreationResponse,
   StaffAndShift,
 } from './interfaces/schedule.interfaces';
 import { ScheduleRepository } from './schedule.repository';
@@ -30,7 +31,10 @@ export class ScheduleService {
       throw new InternalServerErrorException();
     }
 
-    const staffIdsToQuery = shifts.map((shift) => shift.staff_id);
+    const staffIdsToQuery = shifts.reduce(
+      (acc, curr) => acc.add(curr.id),
+      new Set<number>(),
+    );
 
     let staffObjs: Staff[];
     try {
@@ -67,7 +71,9 @@ export class ScheduleService {
     return schedule;
   }
 
-  async createShift(createShiftDto: CreateShiftDto): Promise<GetOneShiftDto[]> {
+  async createShifts(
+    createShiftDto: CreateShiftDto,
+  ): Promise<ShiftCreationResponse> {
     let createdShifts: Shift[];
     try {
       createdShifts = await this.scheduleRepository.createShift(createShiftDto);
@@ -79,6 +85,22 @@ export class ScheduleService {
       }
     }
 
-    return createdShifts;
+    return {
+      shifts_created: createdShifts.length,
+      first_shift: createdShifts[0].start_date,
+      last_shift: createdShifts[createdShifts.length - 1].start_date,
+    } as ShiftCreationResponse;
+  }
+
+  async deleteShifts(deleteShiftsDto: DeleteShiftDto) {
+    try {
+      return await this.scheduleRepository.deleteShift(deleteShiftsDto);
+    } catch (error) {
+      if (error instanceof PostgresError) {
+        throw new BadRequestException();
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
   }
 }
