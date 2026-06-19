@@ -7,7 +7,7 @@ import { shiftsTable } from '../db/schema';
 import { Shift } from '../db/types';
 import { CreateShiftDto } from './interfaces/schedule.interfaces';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { asc, lte, sql } from 'drizzle-orm';
+import { and, asc, gte, lte, sql } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 import { PostgresError } from '@src/db/utils';
 
@@ -21,7 +21,15 @@ export class ScheduleRepository {
       returnedShifts = await this.db
         .select()
         .from(shiftsTable)
-        .where(lte(shiftsTable.end_date, sql`NOW() + ${daysAhead}`))
+        .where(
+          and(
+            lte(
+              shiftsTable.start_date,
+              sql`NOW() + ${daysAhead} * INTERVAL '1 day'`,
+            ),
+            gte(shiftsTable.start_date, sql`NOW()`),
+          ),
+        )
         .orderBy(asc(shiftsTable.staff_id));
     } catch (error) {
       const dbError =

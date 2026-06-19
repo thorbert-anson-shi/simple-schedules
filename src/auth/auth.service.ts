@@ -4,12 +4,15 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '@src/db/types';
-import { CreateOneUserDto } from '@src/users/interfaces/users.interfaces';
 import { UsersRepository } from '@src/users/users.repository';
-import { LoginDto } from './interfaces/auth.interfaces';
+import {
+  LoginDto,
+  RegistrationDto,
+  RegistrationResultDto,
+} from './interfaces/auth.interfaces';
 import argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
+import { CreateOneUserDto } from '@src/users/interfaces/users.interfaces';
 
 @Injectable()
 export class AuthService {
@@ -18,8 +21,25 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(registrationData: CreateOneUserDto): Promise<User> {
-    return await this.usersRepository.createUser(registrationData);
+  async register(
+    registrationData: RegistrationDto,
+  ): Promise<RegistrationResultDto> {
+    const passwordHash = await argon2.hash(registrationData.password);
+    const userCreationData: CreateOneUserDto = {
+      email: registrationData.email,
+      passwordHash,
+    };
+
+    const createdUsers =
+      await this.usersRepository.createUser(userCreationData);
+
+    if (createdUsers.length === 0 || createdUsers.length > 1) {
+      throw new InternalServerErrorException();
+    }
+
+    const { id, email, role } = createdUsers[0];
+
+    return { id, email, role };
   }
 
   async login(loginData: LoginDto): Promise<{ access_token: string }> {

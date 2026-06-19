@@ -1,7 +1,7 @@
 import {
-  type CreateShiftDto,
-  type GetOneShiftDto,
-  type GetScheduleDto,
+  CreateShiftDto,
+  GetScheduleDto,
+  ShiftCreationResponse,
 } from './interfaces/schedule.interfaces';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
@@ -28,7 +28,7 @@ export class ScheduleController {
   @Roles(['ADMIN'])
   async createShift(
     @Body() createShiftBody: CreateShiftDto,
-  ): Promise<GetOneShiftDto[]> {
+  ): Promise<ShiftCreationResponse> {
     return await this.scheduleService.createShift(createShiftBody);
   }
 }

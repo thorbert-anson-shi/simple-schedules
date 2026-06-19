@@ -1,6 +1,6 @@
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+const { migrate } = require('drizzle-orm/node-postgres/migrator');
+const { Pool } = require('pg');
+const { drizzle } = require('drizzle-orm/node-postgres');
 
 async function run() {
   try {

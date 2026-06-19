@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ScheduleController } from './schedule.controller';
 import {
   CreateShiftDto,
-  GetOneShiftDto,
+  type GetOneShiftDto,
   GetScheduleDto,
 } from './interfaces/schedule.interfaces';
 import { ScheduleService } from './schedule.service';

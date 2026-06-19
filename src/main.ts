@@ -11,6 +11,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { ConfigProvider } from './config';
 import { usersTable } from './db/schema';
 import argon2 from 'argon2';
+import { ValidationPipe } from '@nestjs/common';
 
 async function seedAdmin() {
   const env = new ConfigProvider().env;
@@ -43,6 +44,7 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, documentFactory);
 
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors({ origin: ['*'] });
 
   await app.register(helmet);

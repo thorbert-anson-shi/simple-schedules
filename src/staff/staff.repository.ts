@@ -14,13 +14,15 @@ import { PostgresError } from '@src/db/utils';
 export class StaffRepository {
   constructor(@Inject('DB_CLIENT') private db: NodePgDatabase) {}
 
-  async getStaffByIdList(idList: number[]): Promise<Staff[]> {
+  async getStaffByIdList(idCollection: Iterable<number>): Promise<Staff[]> {
     let staffList: Staff[];
     try {
+      const idArray = [...idCollection];
+
       staffList = await this.db
         .select()
         .from(staffTable)
-        .where(inArray(staffTable, idList));
+        .where(inArray(staffTable.id, idArray));
     } catch (error) {
       const dbError =
         error instanceof DatabaseError
