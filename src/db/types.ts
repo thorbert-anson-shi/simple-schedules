@@ -9,9 +9,17 @@ dayAsName.set(6, 'SATURDAY');
 
 type Role = 'ADMIN' | 'CUSTOMER';
 
-import { shiftsTable, staffTable, usersTable } from './schema';
+import { bookingsTable, shiftsTable, staffTable, usersTable } from './schema';
 type Shift = typeof shiftsTable.$inferSelect;
 type Staff = typeof staffTable.$inferSelect;
 type User = typeof usersTable.$inferSelect;
+type Booking = typeof bookingsTable.$inferSelect;
 
-export { dayAsName, type Role, type Shift, type Staff, type User };
+export {
+  dayAsName,
+  type Role,
+  type Shift,
+  type Staff,
+  type User,
+  type Booking,
+};

@@ -3,17 +3,14 @@ import { ApiProperty } from '@nestjs/swagger';
 type BookingStatus = 'BOOKED' | 'CANCELED';
 
 class CreateBookingDto {
-  @ApiProperty()
   customer_id: number;
-
-  @ApiProperty()
   shift_id: number;
-
-  @ApiProperty()
-  status: BookingStatus;
 }
 
 class GetOneBookingDto {
+  @ApiProperty()
+  id: number;
+
   @ApiProperty()
   customer_id: number;
 

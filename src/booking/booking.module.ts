@@ -3,10 +3,12 @@ import { BookingController } from './booking.controller';
 import { BookingService } from './booking.service';
 import { DatabaseModule } from '@src/db/database.module';
 import { BookingRepository } from './booking.repository';
+import { ScheduleModule } from '@src/schedule/schedule.module';
+import { ConfigProvider } from '@src/config';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, ScheduleModule],
   controllers: [BookingController],
-  providers: [BookingService, BookingRepository],
+  providers: [BookingService, BookingRepository, ConfigProvider],
 })
 export class BookingModule {}

@@ -5,32 +5,32 @@ import {
   GetScheduleDto,
   ShiftCreationResponse,
 } from './interfaces/schedule.interfaces';
-import {
-  Body,
-  Controller,
-  Delete,
-  ForbiddenException,
-  Get,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { Role } from '../db/types';
 import { User } from '../users/users.decorator';
 import { AuthGuard, RolesGuard } from '../auth/auth.guard';
 import { Roles } from '../auth/auth.decorators';
+import { ConfigProvider } from '@src/config';
 
 @Controller('schedule')
 @UseGuards(AuthGuard, RolesGuard)
 export class ScheduleController {
-  constructor(private scheduleService: ScheduleService) {}
+  constructor(
+    private scheduleService: ScheduleService,
+    private configProvider: ConfigProvider,
+  ) {}
 
   @Get()
   @Roles(['ADMIN', 'CUSTOMER'])
   async getAll(
     @User() user: { sub: number; role: Role },
   ): Promise<GetScheduleDto> {
-    const daysAhead: number = user.role === 'ADMIN' ? 180 : 14;
+    const daysAhead: number =
+      user.role === 'ADMIN'
+        ? parseInt(this.configProvider.getEnvVar('ADMIN_LOOKAHEAD_DAYS'))
+        : parseInt(this.configProvider.getEnvVar('CUSTOMER_LOOKAHEAD_DAYS'));
+
     return await this.scheduleService.fetchSchedule(daysAhead);
   }
 

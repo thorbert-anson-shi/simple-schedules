@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -13,6 +14,8 @@ import {
 import argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { CreateOneUserDto } from '@src/users/interfaces/users.interfaces';
+import { PostgresError } from '@src/db/utils';
+import { User } from '@src/db/types';
 
 @Injectable()
 export class AuthService {
@@ -30,8 +33,17 @@ export class AuthService {
       passwordHash,
     };
 
-    const createdUsers =
-      await this.usersRepository.createUser(userCreationData);
+    let createdUsers: User[];
+
+    try {
+      createdUsers = await this.usersRepository.createUser(userCreationData);
+    } catch (error) {
+      if (error instanceof PostgresError) {
+        throw new BadRequestException();
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
 
     if (createdUsers.length === 0 || createdUsers.length > 1) {
       throw new InternalServerErrorException();
@@ -46,7 +58,7 @@ export class AuthService {
     const foundUsers = await this.usersRepository.findByEmail(loginData.email);
 
     if (foundUsers.length === 0) {
-      throw new NotFoundException();
+      throw new UnauthorizedException();
     } else if (foundUsers.length > 1) {
       throw new InternalServerErrorException();
     }
