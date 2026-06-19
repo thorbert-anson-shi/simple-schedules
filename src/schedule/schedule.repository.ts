@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { shiftsTable } from '../db/schema';
 import { Shift } from '../db/types';
 import {
+  BlockOutShiftsDto,
   CreateShiftDto,
   DeleteShiftDto,
 } from './interfaces/schedule.interfaces';
@@ -84,6 +85,24 @@ export class ScheduleRepository {
             eq(shiftsTable.staff_id, deleteShiftsDto.staff_id),
             lte(shiftsTable.end_date, deleteShiftsDto.end_date),
             gte(shiftsTable.start_date, deleteShiftsDto.start_date),
+          ),
+        );
+    } catch (error) {
+      throw getPostgresError(error);
+    }
+
+    return result.rowCount ?? 0;
+  }
+
+  async blockOutShifts(blockOutShiftsDto: BlockOutShiftsDto): Promise<number> {
+    let result: QueryResult;
+    try {
+      result = await this.db
+        .delete(shiftsTable)
+        .where(
+          and(
+            lte(shiftsTable.end_date, blockOutShiftsDto.end_date),
+            gte(shiftsTable.start_date, blockOutShiftsDto.start_date),
           ),
         );
     } catch (error) {
