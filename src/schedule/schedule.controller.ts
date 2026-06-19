@@ -1,4 +1,5 @@
 import {
+  BlockOutShiftsDto,
   CreateShiftDto,
   DeleteShiftDto,
   GetScheduleDto,
@@ -48,6 +49,16 @@ export class ScheduleController {
   ): Promise<{ num_deleted: number }> {
     return {
       num_deleted: await this.scheduleService.deleteShifts(deleteShiftsBody),
+    };
+  }
+
+  @Delete('/block')
+  @Roles(['ADMIN'])
+  async blockOutShifts(
+    @Body() blockOutShiftsDto: BlockOutShiftsDto,
+  ): Promise<{ num_deleted: number }> {
+    return {
+      num_deleted: await this.scheduleService.blockOutShifts(blockOutShiftsDto),
     };
   }
 }

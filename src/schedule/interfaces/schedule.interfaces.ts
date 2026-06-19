@@ -81,6 +81,18 @@ class DeleteShiftDto {
   end_date: Date;
 }
 
+class BlockOutShiftsDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString({ strict: true, strictSeparator: true })
+  start_date: Date;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString({ strict: true, strictSeparator: true })
+  end_date: Date;
+}
+
 export {
   StaffAndShift,
   DateAndShifts,
@@ -88,5 +100,6 @@ export {
   ShiftCreationResponse,
   CreateShiftDto,
   DeleteShiftDto,
+  BlockOutShiftsDto,
   type GetOneShiftDto,
 };

@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import {
+  BlockOutShiftsDto,
   CreateShiftDto,
   DateAndShifts,
   DeleteShiftDto,
@@ -92,9 +93,21 @@ export class ScheduleService {
     } as ShiftCreationResponse;
   }
 
-  async deleteShifts(deleteShiftsDto: DeleteShiftDto) {
+  async deleteShifts(deleteShiftsDto: DeleteShiftDto): Promise<number> {
     try {
       return await this.scheduleRepository.deleteShift(deleteShiftsDto);
+    } catch (error) {
+      if (error instanceof PostgresError) {
+        throw new BadRequestException();
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  async blockOutShifts(blockOutShiftsDto: BlockOutShiftsDto): Promise<number> {
+    try {
+      return await this.scheduleRepository.blockOutShifts(blockOutShiftsDto);
     } catch (error) {
       if (error instanceof PostgresError) {
         throw new BadRequestException();
