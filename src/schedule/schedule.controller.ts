@@ -1,9 +1,18 @@
 import {
   CreateShiftDto,
+  DeleteShiftDto,
   GetScheduleDto,
   ShiftCreationResponse,
 } from './interfaces/schedule.interfaces';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { Role } from '../db/types';
 import { User } from '../users/users.decorator';
@@ -27,8 +36,18 @@ export class ScheduleController {
   @Post()
   @Roles(['ADMIN'])
   async createShift(
-    @Body() createShiftBody: CreateShiftDto,
+    @Body() createShiftsBody: CreateShiftDto,
   ): Promise<ShiftCreationResponse> {
-    return await this.scheduleService.createShift(createShiftBody);
+    return await this.scheduleService.createShifts(createShiftsBody);
+  }
+
+  @Delete()
+  @Roles(['ADMIN'])
+  async deleteShifts(
+    @Body() deleteShiftsBody: DeleteShiftDto,
+  ): Promise<{ num_deleted: number }> {
+    return {
+      num_deleted: await this.scheduleService.deleteShifts(deleteShiftsBody),
+    };
   }
 }

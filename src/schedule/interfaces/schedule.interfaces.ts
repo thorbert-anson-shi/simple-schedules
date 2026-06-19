@@ -64,11 +64,29 @@ class CreateShiftDto {
   num_weeks: number;
 }
 
+class DeleteShiftDto {
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  staff_id: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString({ strict: true, strictSeparator: true })
+  start_date: Date;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsDateString({ strict: true, strictSeparator: true })
+  end_date: Date;
+}
+
 export {
   StaffAndShift,
   DateAndShifts,
   GetScheduleDto,
   ShiftCreationResponse,
   CreateShiftDto,
+  DeleteShiftDto,
   type GetOneShiftDto,
 };

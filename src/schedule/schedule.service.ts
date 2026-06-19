@@ -6,6 +6,7 @@ import {
 import {
   CreateShiftDto,
   DateAndShifts,
+  DeleteShiftDto,
   GetScheduleDto,
   ShiftCreationResponse,
   StaffAndShift,
@@ -70,7 +71,7 @@ export class ScheduleService {
     return schedule;
   }
 
-  async createShift(
+  async createShifts(
     createShiftDto: CreateShiftDto,
   ): Promise<ShiftCreationResponse> {
     let createdShifts: Shift[];
@@ -89,5 +90,17 @@ export class ScheduleService {
       first_shift: createdShifts[0].start_date,
       last_shift: createdShifts[createdShifts.length - 1].start_date,
     } as ShiftCreationResponse;
+  }
+
+  async deleteShifts(deleteShiftsDto: DeleteShiftDto) {
+    try {
+      return await this.scheduleRepository.deleteShift(deleteShiftsDto);
+    } catch (error) {
+      if (error instanceof PostgresError) {
+        throw new BadRequestException();
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
   }
 }

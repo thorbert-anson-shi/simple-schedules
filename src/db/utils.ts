@@ -1,3 +1,7 @@
+import { InternalServerErrorException } from '@nestjs/common';
+import { DrizzleQueryError } from 'drizzle-orm';
+import { DatabaseError } from 'pg';
+
 export class PostgresError extends Error {
   public readonly code: string | undefined;
 
@@ -7,5 +11,25 @@ export class PostgresError extends Error {
     this.code = code;
 
     Object.setPrototypeOf(this, PostgresError.prototype);
+  }
+}
+
+export function getPostgresError(
+  error: DrizzleQueryError | DatabaseError,
+): PostgresError | InternalServerErrorException {
+  const dbError =
+    error instanceof DatabaseError
+      ? error
+      : error?.cause instanceof DatabaseError
+        ? error.cause
+        : null;
+  if (dbError) {
+    return new PostgresError(
+      'An error occurred with the node-postgres driver',
+      dbError.code,
+      { cause: dbError.cause },
+    );
+  } else {
+    return new InternalServerErrorException();
   }
 }

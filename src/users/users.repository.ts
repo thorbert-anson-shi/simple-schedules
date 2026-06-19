@@ -10,23 +10,32 @@ import { CreateOneUserDto } from './interfaces/users.interfaces';
 import { usersTable } from '@src/db/schema';
 import { eq } from 'drizzle-orm';
 import { DrizzleQueryError } from 'drizzle-orm';
+import { getPostgresError } from '@src/db/utils';
 
 @Injectable()
 export class UsersRepository {
   constructor(@Inject('DB_CLIENT') private db: NodePgDatabase) {}
 
   async findById(userId: number): Promise<User[]> {
-    return await this.db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, userId));
+    try {
+      return await this.db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, userId));
+    } catch (error) {
+      throw getPostgresError(error);
+    }
   }
 
   async findByEmail(email: string): Promise<User[]> {
-    return await this.db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
+    try {
+      return await this.db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email));
+    } catch (error) {
+      throw getPostgresError(error);
+    }
   }
 
   async createUser(userData: CreateOneUserDto): Promise<User[]> {
@@ -40,15 +49,15 @@ export class UsersRepository {
         })
         .returning();
     } catch (error) {
-      if (error instanceof DrizzleQueryError) {
-        throw new BadRequestException();
-      } else {
-        throw new InternalServerErrorException();
-      }
+      throw getPostgresError(error);
     }
   }
 
   async deleteUser(userId: number): Promise<void> {
-    return;
+    try {
+      await this.db.delete(usersTable).where(eq(usersTable.id, userId));
+    } catch (error) {
+      throw getPostgresError(error);
+    }
   }
 }
