@@ -9,7 +9,7 @@ import {
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
 import { QueryResult } from 'pg';
-import { getPostgresError, PostgresError } from '@src/db/utils';
+import { getPostgresError } from '@src/db/utils';
 
 @Injectable()
 export class ScheduleRepository {
