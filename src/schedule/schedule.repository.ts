@@ -7,35 +7,46 @@ import {
   DeleteShiftDto,
 } from './interfaces/schedule.interfaces';
 import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import { QueryResult } from 'pg';
-import { getPostgresError, PostgresError } from '@src/db/utils';
+import { getPostgresError } from '@src/db/utils';
 
 @Injectable()
 export class ScheduleRepository {
   constructor(@Inject('DB_CLIENT') private db: NodePgDatabase) {}
 
-  async queryShifts(daysAhead: number): Promise<Shift[]> {
-    let returnedShifts: Shift[];
+  async queryShifts(daysAhead: number, daysBehind?: number): Promise<Shift[]> {
     try {
-      returnedShifts = await this.db
+      const lowerBoundSql = daysBehind
+        ? sql`NOW() - make_interval(days => ${daysBehind})`
+        : sql`NOW()`;
+
+      const upperBoundSql = sql`NOW() + make_interval(days => ${daysAhead})`;
+
+      return await this.db
         .select()
         .from(shiftsTable)
         .where(
           and(
-            lte(
-              shiftsTable.start_date,
-              sql`NOW() + ${daysAhead} * INTERVAL '1 day'`,
-            ),
-            gte(shiftsTable.start_date, sql`NOW()`),
+            lte(shiftsTable.start_date, upperBoundSql),
+            gte(shiftsTable.start_date, lowerBoundSql),
           ),
         )
-        .orderBy(asc(shiftsTable.staff_id));
+        .orderBy(asc(shiftsTable.start_date));
     } catch (error) {
       throw getPostgresError(error);
     }
+  }
 
-    return returnedShifts;
+  async getShiftsByShiftIds(shiftIds: number[]): Promise<Shift[]> {
+    try {
+      return await this.db
+        .select()
+        .from(shiftsTable)
+        .where(inArray(shiftsTable.id, shiftIds));
+    } catch (error) {
+      throw getPostgresError(error);
+    }
   }
 
   async createShift({
@@ -76,39 +87,41 @@ export class ScheduleRepository {
   }
 
   async deleteShift(deleteShiftsDto: DeleteShiftDto): Promise<number> {
-    let result: QueryResult;
+    let result: { id: number }[];
     try {
       result = await this.db
         .delete(shiftsTable)
         .where(
           and(
             eq(shiftsTable.staff_id, deleteShiftsDto.staff_id),
-            lte(shiftsTable.end_date, deleteShiftsDto.end_date),
-            gte(shiftsTable.start_date, deleteShiftsDto.start_date),
+            lte(shiftsTable.end_date, new Date(deleteShiftsDto.end_date)),
+            gte(shiftsTable.start_date, new Date(deleteShiftsDto.start_date)),
           ),
-        );
+        )
+        .returning({ id: shiftsTable.id });
     } catch (error) {
       throw getPostgresError(error);
     }
 
-    return result.rowCount ?? 0;
+    return result.length;
   }
 
   async blockOutShifts(blockOutShiftsDto: BlockOutShiftsDto): Promise<number> {
-    let result: QueryResult;
+    let result: { id: number }[];
     try {
       result = await this.db
         .delete(shiftsTable)
         .where(
           and(
-            lte(shiftsTable.end_date, blockOutShiftsDto.end_date),
-            gte(shiftsTable.start_date, blockOutShiftsDto.start_date),
+            lte(shiftsTable.end_date, new Date(blockOutShiftsDto.end_date)),
+            gte(shiftsTable.start_date, new Date(blockOutShiftsDto.start_date)),
           ),
-        );
+        )
+        .returning({ id: shiftsTable.id });
     } catch (error) {
       throw getPostgresError(error);
     }
 
-    return result.rowCount ?? 0;
+    return result.length;
   }
 }

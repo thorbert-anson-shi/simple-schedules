@@ -1,13 +1,13 @@
 import { integer, pgTable } from 'drizzle-orm/pg-core';
 import { varchar } from 'drizzle-orm/pg-core';
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { date } from 'drizzle-orm/pg-core';
 import { check } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { uniqueIndex } from 'drizzle-orm/pg-core';
 import { timestamp } from 'drizzle-orm/pg-core';
 
 const roleEnum = pgEnum('role', ['ADMIN', 'CUSTOMER']);
+const bookingStatusEnum = pgEnum('booking_status', ['BOOKED', 'CANCELED']);
 
 const staffTable = pgTable('staff', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -47,4 +47,30 @@ const shiftsTable = pgTable(
   ],
 );
 
-export { roleEnum, staffTable, usersTable, shiftsTable };
+const bookingsTable = pgTable(
+  'bookings',
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    customer_id: integer()
+      .references(() => usersTable.id)
+      .notNull(),
+    shift_id: integer()
+      .references(() => shiftsTable.id)
+      .notNull(),
+    status: bookingStatusEnum().notNull(),
+  },
+  (table) => [
+    uniqueIndex('one_booking_per_shift')
+      .on(table.shift_id)
+      .where(sql`${table.status} = 'BOOKED'`),
+  ],
+);
+
+export {
+  bookingStatusEnum,
+  roleEnum,
+  staffTable,
+  usersTable,
+  shiftsTable,
+  bookingsTable,
+};

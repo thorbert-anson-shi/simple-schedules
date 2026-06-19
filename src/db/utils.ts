@@ -30,6 +30,7 @@ export function getPostgresError(
       { cause: dbError.cause },
     );
   } else {
+    console.log(error.message);
     return new InternalServerErrorException();
   }
 }

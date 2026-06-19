@@ -5,6 +5,8 @@ interface EnvConfig {
   JWT_SECRET: string;
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
+  ADMIN_LOOKAHEAD_DAYS: string;
+  CUSTOMER_LOOKAHEAD_DAYS: string;
 }
 
 @Injectable()
@@ -28,6 +30,8 @@ export class ConfigProvider {
         JWT_SECRET: this.getEnvVar('JWT_SECRET'),
         ADMIN_EMAIL: this.getEnvVar('ADMIN_EMAIL'),
         ADMIN_PASSWORD: this.getEnvVar('ADMIN_PASSWORD'),
+        ADMIN_LOOKAHEAD_DAYS: this.getEnvVar('ADMIN_LOOKAHEAD_DAYS'),
+        CUSTOMER_LOOKAHEAD_DAYS: this.getEnvVar('CUSTOMER_LOOKAHEAD_DAYS'),
       };
     }
     return this._env;
